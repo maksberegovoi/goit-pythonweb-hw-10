@@ -48,3 +48,6 @@ class ContactRepository:
         stmt = select(Contact).where(Contact.birthday.between(today, limit))
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+    async def test(self):
+        pass
