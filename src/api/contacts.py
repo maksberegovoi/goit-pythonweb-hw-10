@@ -1,25 +1,25 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.database.db import AsyncSessionLocal
+from src.database.db import get_db
+from src.database.models import User
 from src.schemas.contacts import ContactCreate, ContactUpdate, ContactResponse
+from src.services.auth import get_current_user
 from src.services.contacts import ContactService
 
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
-async def get_db():
-    async with AsyncSessionLocal() as session:
-        yield session
 
 @router.post("/", response_model=ContactResponse)
-async def create(contact: ContactCreate, db: AsyncSession = Depends(get_db)):
+async def create(contact: ContactCreate, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     service = ContactService(db)
-    return await service.create_contact(contact.model_dump())
+    print(user)
+    return await service.create_contact(contact.model_dump(), user)
 
 @router.get("/", response_model=list[ContactResponse])
-async def list_contacts(q: str | None = None, db: AsyncSession = Depends(get_db)):
+async def list_contacts(q: str | None = None, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     service = ContactService(db)
-    return await service.list_contacts(q)
+    return await service.list_contacts(user, q)
 
 @router.get("/{contact_id}", response_model=ContactResponse)
 async def get(contact_id: int, db: AsyncSession = Depends(get_db)):

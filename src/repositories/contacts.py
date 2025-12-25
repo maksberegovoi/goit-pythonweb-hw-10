@@ -1,22 +1,22 @@
 from datetime import date, timedelta
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.database.models import Contact
+from src.database.models import Contact, User
 
 
 class ContactRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def create(self, data: dict):
-        contact = Contact(**data)
+    async def create(self, data: dict, user: User):
+        contact = Contact(**data, user=user)
         self.session.add(contact)
         await self.session.commit()
         await self.session.refresh(contact)
         return contact
 
-    async def get_all(self, query: str | None = None):
-        stmt = select(Contact)
+    async def get_all(self, user: User, query: str | None = None):
+        stmt = select(Contact).where(Contact.user_id == user.id)
         if query:
             stmt = stmt.where(
                 (Contact.name.ilike(f"%{query}%")) |
@@ -48,6 +48,3 @@ class ContactRepository:
         stmt = select(Contact).where(Contact.birthday.between(today, limit))
         result = await self.session.execute(stmt)
         return result.scalars().all()
-
-    async def test(self):
-        pass
