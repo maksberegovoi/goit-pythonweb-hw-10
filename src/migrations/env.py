@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from src.conf.config import Config
+from src.conf.config import config as cfg
 from src.database.models import Base
 
 # this is the Alembic Config object, which provides
@@ -16,7 +16,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option('sqlalchemy.url', Config.SYNC_DB_URL)
+config.set_main_option('sqlalchemy.url', cfg.SYNC_DB_URL)
 
 
 # add your model's MetaData object here
